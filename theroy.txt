@@ -1,0 +1,29 @@
+Short Abstract:
+
+As the software complexity of Zeiss systems increases, traditional "pass/fail" testing is no longer sufficient to guarantee operational stability. This project develops a Predictive Reliability Engine that transforms raw development data into actionable risk insights. This model enables the DDQQ department to quantify uncertainty and predict deployment risks before they impact the production, effectively establishing a data-driven “Quality Gate”  for our software.
+
+
+Abstract:
+
+In the contemporary software development landscape, the increasing complexity of applications poses significant challenges for assessing software reliability effectively.The traditional testing and quality assurance practices often fall short due to the varied nature of production environments and the multitude of modules involved. This project aims to develop a probabilistic software reliability prediction platform that leverages empirical data derived from various sources, including Azure DevOps code quality metrics (such as static analysis, security, maintainability, reliability, and coverage), Software Bill of Materials (SBOM), Black Duck vulnerability assessments, and real-time incident reports from production environments.
+By integrating data from testing pipelines, incident logs, and field data, the proposed platform aspires to create a comprehensive framework for estimating software reliability. The application of probabilistic models will enable the quantification of uncertainty in reliability predictions, providing stakeholders with actionable insights into system complexity and potential reliability risks throughout the production lifecycle. This approach enhances the understanding of software behavior in real-world scenarios and facilitates informed decision-making regarding resource allocation for testing and maintenance efforts.
+Ultimately, this project will contribute to the ongoing advancement of software quality assurance engineering by establishing a data-driven foundation for predicting and improving the reliability of complex systems, thereby fostering greater confidence in software deployments and supporting our commitment to quality assurance.
+
+
+
+Introduction:
+
+1.1 The Context: The Reliability Crisis in Modern Software In the contemporary landscape of Industry 4.0 and high-precision manufacturing, software has evolved from a mere operational component into the backbone of critical infrastructure. As systems like the D100 and CMT machines become increasingly interconnected, the complexity of their underlying software stacks spanning Process Software, Control Logic, and PLC Kernels has grown exponentially. However, this explosion in complexity poses a fundamental paradox: while our ability to write code has accelerated through CI/CD pipelines, our ability to guarantee its reliability has lagged behind. The cost of failure is no longer just a software bug; it is production downtime, hardware damage, and reputational risk.(ref. smartbear)
+
+1.2 The Problem: The Failure of Deterministic Testing
+Traditionally, Quality Assurance (QA) has relied on deterministic testing methods unit tests, integration tests, and static analysis. While these "Quality Gates" are necessary, they are insufficient. They operate on a binary premise (Pass/Fail) that fails to capture the stochastic nature of real-world environments.
+
+The "Testing Blind Spot": A software build may pass 100% of its unit tests yet still fail in production due to complex interactions between "safe" code changes and "risky" operational environments.
+
+The Data Disconnect: Organizations today are data-rich but insight-poor. We generate gigabytes of data—Azure DevOps logs, Black Duck security scans, and SonarQube metrics but this data remains siloed. We know that code churn is high, or that a vulnerability exists, but standard models fail to quantify how these variables interact to increase the probability of a system crash.
+
+1.3 The Research Gap: The Need for Uncertainty Quantification
+Current industry practices often rely on "Gut Feeling" or simple regression models to approve releases. These approaches suffer from a critical flaw: they provide Point Estimates (e.g., "The software is ready") without quantifying the uncertainty. In a safety-critical domain like Zeiss DDQQ, a simple "Pass" is dangerous if the confidence level is low. There is a distinct lack of frameworks that can mathematically integrate heterogeneous data, combining static code metrics with security risks and expert judgment to predict reliability with a calculated confidence interval.
+
+1.4 The Proposed Solution: A Probabilistic "Quality Gate"
+This project proposes a paradigm shift from Reactive Quality Assurance to Predictive Reliability Engineering. We introduce a Probabilistic Reliability Prediction Platform driven by Bayesian Networks and Monte Carlo simulations. Unlike "Black Box" AI models (such as Neural Networks) which lack explainability, Bayesian Networks allow us to model the causal relationships between software artifacts (e.g., High Complexity) and failure events. By synthesizing data from the entire CI/CD lifecycle: including Azure DevOps build metrics, Black Duck vulnerability assessments, and historical field data—this platform creates a "Dynamic Reliability Score." This approach not only predicts the likelihood of failure but also quantifies the uncertainty of that prediction, providing stakeholders with actionable, data-driven insights to optimize the release decision process.
