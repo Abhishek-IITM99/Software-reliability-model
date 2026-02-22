@@ -1,0 +1,14 @@
+# --- Web API Framework ---
+fastapi
+uvicorn
+pydantic
+
+# --- Data Processing ---
+pandas
+numpy
+numexpr
+
+# --- Machine Learning Models ---
+pgmpy
+scikit-learn
+xgboost
