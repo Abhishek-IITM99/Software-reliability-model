@@ -1,7 +1,9 @@
-# --- Web API Framework ---
+# --- Web API & Dashboard Frameworks ---
 fastapi
 uvicorn
 pydantic
+streamlit
+requests
 
 # --- Data Processing ---
 pandas

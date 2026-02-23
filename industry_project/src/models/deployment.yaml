@@ -1,0 +1,56 @@
+# ==========================================
+# PART 1: THE DEPLOYMENT (The Pod)
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zeiss-reliability-prototype
+  labels:
+    app: reliability-gate
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: reliability-gate
+  template:
+    metadata:
+      labels:
+        app: reliability-gate
+    spec:
+      containers:
+      # 🧠 CONTAINER 1: The Brain (FastAPI Backend)
+      - name: backend-api
+        # Note: Update this link when Zeiss IT gives you the Harbor/ACR URL
+        image: zeissregistry.azurecr.io/reliability-model:latest 
+        imagePullPolicy: Always
+        # We override the Dockerfile to start FastAPI here
+        command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+        ports:
+        - containerPort: 8000 
+        
+      # 📊 CONTAINER 2: The Face (Streamlit Dashboard)
+      - name: frontend-dashboard
+        # Exact same image, we just tell it to do a different job!
+        image: zeissregistry.azurecr.io/reliability-model:latest 
+        imagePullPolicy: Always
+        # We override the Dockerfile to start Streamlit here
+        command: ["python", "-m", "streamlit", "run", "dashboard.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+        ports:
+        - containerPort: 8501 
+
+---
+# ==========================================
+# PART 2: THE SERVICE (The Front Door)
+# ==========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: reliability-dashboard-service
+spec:
+  selector:
+    app: reliability-gate
+  ports:
+    - protocol: TCP
+      port: 80       # The standard web port managers will type into their browser
+      targetPort: 8501 # We route the traffic to the Streamlit Dashboard (not the API!)
+  type: LoadBalancer # Asks the Zeiss network to assign a dedicated IP address

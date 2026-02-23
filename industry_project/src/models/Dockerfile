@@ -13,8 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 5. Copy your Python scripts and the data/ folder into the container
 COPY . .
 
-# 6. Expose the port the API runs on
+# 6. Expose BOTH ports: 8000 for FastAPI (Backend) and 8501 for Streamlit (Frontend)
 EXPOSE 8000
+EXPOSE 8501
 
-# 7. Start the FastAPI server when the container wakes up
+# 7. Default start command (FastAPI)
+# Note: Our Kubernetes deployment.yaml automatically overrides this for the Streamlit container!
 CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
