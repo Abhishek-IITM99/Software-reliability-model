@@ -1,0 +1,65 @@
+parameters:
+  - name: environment
+    type: string
+  - name: nodeVersion
+    type: string
+  - name: sourceFolderName
+    type: string
+
+stages:
+  - stage: ${{ replace( parameters.sourceFolderName, '-', '_') }}DockerBuild
+    displayName: Build Docker '${{ parameters.sourceFolderName }}'
+    dependsOn:
+      - versionStage
+      - runTests
+    variables:
+      - name: environmentInLowerCase
+        value: ${{ lower(parameters.environment) }}
+      - name: majorMinorPatch
+        value: $[stageDependencies.versionStage.versionJob.outputs['versionStep.majorMinorPatch']]
+      - name: fullSemVer
+        value: $[stageDependencies.versionStage.versionJob.outputs['versionStep.fullSemVer']]
+      - name: dockerTag
+        value: $[replace(stageDependencies.versionStage.versionJob.outputs['versionStep.fullSemVer'], '+', '-')]
+      - name: imageName
+        value: smt-releases-${{ parameters.sourceFolderName }}
+
+    jobs:
+      - job: ${{ replace( parameters.sourceFolderName, '-', '_') }}DockerBuildJob
+        displayName: Build Docker '${{ parameters.sourceFolderName }}' Job
+        steps:
+          - template: ../steps/update-version.yml
+            parameters:
+              filePaths:
+                - $(Build.SourcesDirectory)/${{ parameters.sourceFolderName }}/package.json
+                - $(Build.SourcesDirectory)/${{ parameters.sourceFolderName }}/package-lock.json
+              version: $(majorMinorPatch)
+
+          - template: ../steps/${{ parameters.sourceFolderName }}-build.yml
+            parameters:
+              environment: ${{ variables.environmentInLowerCase }}
+              nodeVersion: ${{ parameters.nodeVersion }}
+
+          - task: Docker@2
+            displayName: Docker Build and Push
+            inputs:
+              command: buildAndPush
+              containerRegistry: Harbor Production Registry Service
+              dockerfile: $(Build.SourcesDirectory)/${{ parameters.sourceFolderName }}/Dockerfile
+              repository: p05-rmshared/$(imageName)
+              tags: |
+                $(dockerTag)
+                ${{ variables.environmentInLowerCase }}
+                latest
+
+      - ${{ if or(eq(parameters.environment, 'Production'), eq(parameters.environment, 'Consolidation')) }}:
+          - template: analysis/blackduck/job/blackduck-job.yml@sharedTemplates
+            parameters:
+              jobNameSuffix: 'Docker'
+              artifactType: 'DOCKER'
+              dependsOnJob: ${{ replace( parameters.sourceFolderName, '-', '_') }}DockerBuildJob
+              imageName: p05-rmshared/$(imageName):$(fullSemVer)
+              imageVersionName: -${{ parameters.sourceFolderName }}
+              leanIxFactSheetId: $(SmtReleases.LeanIxFactSheetId)
+              failOnPolicyViolation: false
+              detectArguments: '--detect.timeout=600'
