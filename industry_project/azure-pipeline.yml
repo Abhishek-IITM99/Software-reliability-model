@@ -1,0 +1,49 @@
+trigger:
+  - master # (Or 'main' if your default branch is named main)
+
+# ==========================================
+# 🛑 ASK EMMANUEL: What is the name of the internal Linux build pool?
+# (ubuntu-latest won't work for an internal Harbor registry)
+# ==========================================
+pool:
+  name: 'Zeiss-Internal-Linux-Agents' # <- Replace this with Emmanuel's answer
+
+variables:
+  # The name of your container image
+  imageName: 'reliability-model'
+
+steps:
+# 1. Download Certificates from Azure DevOps Secure Files
+- task: DownloadSecureFile@1
+  name: corporateCertificate
+  displayName: 'Download Corporate CA Certificate'
+  inputs:
+    secureFile: 'Carl_Zeiss_AG_Corporate-CA-2026.crt'
+
+- task: DownloadSecureFile@1
+  name: rootCertificate
+  displayName: 'Download Root CA Certificate'
+  inputs:
+    secureFile: 'Carl_Zeiss_AG_Root-CA-2036.crt'
+
+# 2. Move Certificates into the correct build context
+- script: |
+    echo "Copying certificates to the Docker build context..."
+    cp $(corporateCertificate.secureFilePath) $(Build.SourcesDirectory)/src/models/
+    cp $(rootCertificate.secureFilePath) $(Build.SourcesDirectory)/src/models/
+  displayName: 'Move Certificates to src/models/ folder'
+
+# 3. Build and Push the Microservices Container to Harbor
+- task: Docker@2
+  displayName: 'Docker Build and Push to Harbor'
+  inputs:
+    command: 'buildAndPush'
+    # This must match the exact name of the Service Connection in Azure DevOps
+    containerRegistry: 'Harbor Production Registry Service' 
+    # Pointing directly to the folder where your code actually lives!
+    dockerfile: '$(Build.SourcesDirectory)/src/models/Dockerfile'
+    # The Harbor project and image name
+    repository: 'p05-rmshared/$(imageName)'
+    tags: |
+      $(Build.BuildId)
+      latest
