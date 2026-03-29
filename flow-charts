@@ -1,0 +1,68 @@
+graph TD
+    %% Nodes
+    Start((Start: Define 1000 Builds))
+    
+    subgraph "Step 1: Azure DevOps Simulation"
+        GenChurn[Generate Code Churn]
+        LogicChurn{Weighted Randomness}
+        Small[Small Fix: 10-100 lines <br> Probability: 80%]
+        Big[Big Refactor: 200-1000 lines <br> Probability: 20%]
+        CalcComp[Calculate Complexity <br> Complexity = Churn / 15 + Noise]
+        CalcTest[Calculate Test Pass Rate <br> Normal Distribution (Mean=99%)]
+    end
+
+    subgraph "Step 2: Security Scan Simulation"
+        GenVuln[Generate Vulnerabilities]
+        LogicVuln{Probabilistic Choice}
+        Safe[0 Criticals <br> Prob: 85%]
+        Risky[1-5 Criticals <br> Prob: 15%]
+    end
+
+    subgraph "Step 3: The 'Hidden Truth' (Physics Engine)"
+        CalcRisk[Calculate Risk Score]
+        MathRisk[Risk = (Churn * 0.03) + (CritVulns * 25) + (TestFailPenalty)]
+        DiceRoll{Roll the Dice}
+        ProbCrash[Crash Probability = Risk / 100]
+    end
+
+    subgraph "Step 4: Outcome & Merging"
+        Crash[Generate Crash Log <br> (Incident ID, Downtime)]
+        NoCrash[Log Success <br> (Downtime = 0)]
+        Merge[MERGE DATASETS]
+        Master[(Final Master CSV)]
+    end
+
+    %% Connections
+    Start --> GenChurn
+    GenChurn --> LogicChurn
+    LogicChurn -- 80% --> Small
+    LogicChurn -- 20% --> Big
+    Small --> CalcComp
+    Big --> CalcComp
+    CalcComp --> CalcTest
+    
+    Start --> GenVuln
+    GenVuln --> LogicVuln
+    LogicVuln --> Safe
+    LogicVuln --> Risky
+    
+    CalcTest --> CalcRisk
+    Safe --> CalcRisk
+    Risky --> CalcRisk
+    
+    CalcRisk --> MathRisk
+    MathRisk --> ProbCrash
+    ProbCrash --> DiceRoll
+    
+    DiceRoll -- "Unlucky (p < Risk)" --> Crash
+    DiceRoll -- "Safe (p > Risk)" --> NoCrash
+    
+    Crash --> Merge
+    NoCrash --> Merge
+    Merge --> Master
+
+    %% Styling
+    style Start fill:#2D3E50,stroke:#fff,color:#fff
+    style Master fill:#109648,stroke:#fff,color:#fff
+    style MathRisk fill:#FFF8DC,stroke:#D4AC0D,stroke-dasharray: 5 5
+    style DiceRoll fill:#E74C3C,stroke:#fff,color:#fff
